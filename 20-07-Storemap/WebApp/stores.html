@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <link rel="stylesheet" href="style.css">
+    
+  </head>
+
+  <body>
+   
+  </body>
+<script>
+  window.onload = function() {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://localhost:3000/getstores');
+    xhr.responseType = 'json';
+    xhr.send();
+    xhr.onload = function() {
+      let responseObj = xhr.response;
+      let body = document.getElementsByTagName("body")[0];
+
+      for (x in responseObj["Stores"]) {
+        let button = document.createElement("button");
+        button.innerHTML = responseObj["Stores"][x];
+        body.appendChild(button);
+      }
+    };
+  }
+</script>
+</html>

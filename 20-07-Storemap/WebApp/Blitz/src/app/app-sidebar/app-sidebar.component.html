@@ -1,0 +1,9 @@
+<a  routerLink="/home" routerLinkActive="active">Home</a>
+<a routerLink="/stores" routerLinkActive="active">Stores</a>
+<a routerLink="/lists" routerLinkActive="active">Lists</a>
+<a routerLink="/settings" routerLinkActive="active">Settings</a>
+<a routerLink="/profile" routerLinkActive="active">Profile</a>
+<app-message-list></app-message-list>
+
+<button *ngIf="!isAuthenticated" (click)="login()"> Login </button>
+<button *ngIf="isAuthenticated" (click)="logout()"> Logout </button>

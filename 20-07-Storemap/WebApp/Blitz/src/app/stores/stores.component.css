@@ -1,0 +1,13 @@
+header-bar{
+    width:100%;
+}
+store-list{
+    width:20%;
+    height: 100%;
+    float:left;
+}
+store-list-view{
+    width:65%;
+    height: 100%;
+    float:right;
+}

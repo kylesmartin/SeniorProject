@@ -1,0 +1,15 @@
+store{
+    width:100%;
+    display: block;
+    height:105px;
+    border:black 1px solid;
+    background-color:rgba(181,219,255,100);
+}
+store:hover{
+    background-color:rgba(210,230,255,100);
+}
+.header{
+    margin-top:1px;
+    margin-bottom:1px;
+    text-align: center;
+}

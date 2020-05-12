@@ -1,0 +1,25 @@
+<mat-sidenav-container id='nav_body'>
+<mat-sidenav mode='side' disableClose=true opened=true class="sidebar">
+        <mat-nav-list>
+            <mat-list-item *ngFor="let link of links">
+               <span matLine>{{ link }}</span>
+               <button mat-icon-button (click)="showList(link)">
+                  <mat-icon>edit</mat-icon>
+               </button>
+               <button mat-icon-button (click)="showList(link)">
+                <mat-icon>share</mat-icon>
+             </button>
+             <button mat-icon-button (click)="showList(link)">
+                <mat-icon>open_in_new</mat-icon>
+             </button>
+            </mat-list-item>
+        </mat-nav-list>
+</mat-sidenav>
+
+<mat-sidenav-content id='nav_content'>
+    <button id='new_list_btn' mat-fab (click)="addList()">
+        <mat-icon>add</mat-icon>
+    </button>
+
+</mat-sidenav-content>
+</mat-sidenav-container>

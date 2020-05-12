@@ -1,0 +1,36 @@
+.sidebar{
+    width:15%;
+    float:left;
+    height:100vh;
+}
+
+.fill-space{
+    flex: 1 1 auto;
+  }
+#main-container{
+    height:100%;
+}
+#sidebar-container{
+    
+    width:85%;
+    float:left;
+    height:100vh;
+}
+#search-form{
+    float:right;
+}
+#search-form input{
+    float:right;
+}
+#toolbar{
+    background-color: #6D97FF;
+}
+.toolbar-button{
+    background-color: #6D97FF;
+    color:white;
+    text-align: center;
+    margin-left: 10px;
+    border:0;
+    font-size: large;
+    margin-right: 10px;
+}

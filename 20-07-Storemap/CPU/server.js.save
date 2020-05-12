@@ -1,0 +1,180 @@
+//By Kyle Martin, Lindsey Volk, Cooper Salmon, Mariano Pache, John Gilig
+
+// Modules /////////////////////////////////////////////////////////////////////////////////////////////
+
+//Socket and server
+var express = require('express');
+var app = express();
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+var dgram = require('dgram');
+var server = dgram.createSocket('udp4');
+var mysql = require('mysql');
+
+// JSON and url parsers
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
+// Port and IP of Host
+var PORT = 3333; // external is 3333
+var HOST = "192.168.1.149"; //RPi
+
+//Port and IP of Device
+var devPORT = 3333;
+var devHOST = "192.168.1.129"
+
+// File reader
+const fs = require('fs');
+const path = "data.json";
+var arr = [];
+
+var weight = 0.0;
+var shelf_weight
+
+//API ENDPOINTS/////////////////////////////////////////////////////////////////////////////////////////
+
+// Publish HTML file
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/data', function(req, res){
+  con.query("SELECT * FROM shelf", function (err, result, fields) {
+    if (err) throw err;
+    // delta represents the weight of the item added
+    var sign = (shelf_weight - weight)/Math.abs(shelf_weight - weight);
+    var delta = Math.abs(shelf_weight - weight);
+    // variables to track the item closest to the weight of delta
+    var min_error = Math.abs(result[0].weight - delta);
+    console.log(result[0].product + ": " + min_error);
+    var min_ind = 0;
+    // variables to track the weight of the current item
+    var error = 0;
+    // iterate through all products known to the shelf and update the item prediction if necessary
+    for (i = 1; i < result.length; i++) {
+      error = Math.abs(result[i].weight - delta);
+      console.log(result[i].product + ": " + error);
+      if (error < min_error) {
+        min_error = error;
+        min_ind = i;
+      }
+    }
+    // if the weight of delta is closer to the weight of the predicted item than it is to zero, then update the database
+    if (min_error < Math.abs(0 - delta)) {
+      if (sign == 1) {
+        var newcount = result[min_ind].count + 1;
+      } else {
+        var newcount = result[min_ind].count - 1;
+      }
+      var sql = "UPDATE shelf SET count = " + newcount + " WHERE product = '" + result[min_ind].product + "'";
+      // insert updated count into database
+      con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+          // send updated data through TCP socket to frontend
+          con.query("SELECT * FROM shelf", function (err, result, fields) {
+            if (err) throw err;
+            console.log(result);
+            res.send(result);
+            weight = shelf_weight;
+          });
+      });
+    } else {
+      con.query("SELECT * FROM shelf", function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        res.send(result);
+        weight = shelf_weight;
+      });
+    }
+  });
+});
+
+
+//SQL CONNECTION////////////////////////////////////////////////////////////////////////////////////////
+
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "PuffDog211",
+  database: "mydb"
+});
+
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+});
+
+//SOCKET MESSAGE READER/////////////////////////////////////////////////////////////////////////////////
+
+// Send sensor readings to frontend
+server.on('message', function (message, remote) {
+    shelf_weight = parseFloat(message.toString());
+    // update the port and host of the remote device
+    devPORT = remote.port;
+    devHOST = remote.address;
+    // Update database
+    con.query("SELECT * FROM shelf", function (err, result, fields) {
+    if (err) throw err;
+    // delta represents the weight of the item added
+    var sign = (shelf_weight - weight)/Math.abs(shelf_weight - weight);
+    var delta = Math.abs(shelf_weight - weight);
+    // variables to track the item closest to the weight of delta
+    var min_error = Math.abs(result[0].weight - delta);
+    console.log(result[0].product + ": " + min_error);
+    var min_ind = 0;
+    // variables to track the weight of the current item
+    var error = 0;
+    // iterate through all products known to the shelf and update the item prediction if necessary
+    for (i = 1; i < result.length; i++) {
+      error = Math.abs(result[i].weight - delta);
+      console.log(result[i].product + ": " + error);
+      if (error < min_error) {
+        min_error = error;
+        min_ind = i;
+      }
+    }
+    // if the weight of delta is closer to the weight of the predicted item than it is to zero, then update the database
+    if (min_error < Math.abs(0 - delta)) {
+      if (sign == 1) {
+        var newcount = result[min_ind].count + 1;
+      } else {
+        var newcount = result[min_ind].count - 1;
+      }
+      var sql = "UPDATE shelf SET count = " + newcount + " WHERE product = '" + result[min_ind].product + "'";
+      // insert updated count into database
+      con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log(result.affectedRows + " record(s) updated");
+        weight = shelf_weight;
+      });
+    } else {
+      weight = shelf_weight;
+    }
+  });
+});
+
+//HOST, SOCKET, AND EXPRESS INITIALIZATIONS/////////////////////////////////////////////////////////////
+
+// User socket connection
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+});
+
+// Listening on port 3000
+http.listen(3000, function() {
+  console.log('listening on *:3000');
+});
+
+// Create server
+server.on('listening', function () {
+    var address = server.address();
+    console.log('UDP Server listening on ' + address.address + ":" + address.port);
+});
+
+// Bind server to port and IP
+server.bind(PORT, HOST);

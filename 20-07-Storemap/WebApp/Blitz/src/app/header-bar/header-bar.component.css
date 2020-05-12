@@ -1,0 +1,18 @@
+h1{
+    width:100%;
+    height:45px;
+    font-size: xx-large;
+    display: block;
+    font: bold 25px Arial;
+    margin-top:1px;
+    margin-bottom: 1px;
+    text-decoration: none;
+    background-color: #F2E3D5;
+    color: #592C28;
+    padding: 2px 6px 2px 6px;
+    border-top: 1px solid #D93636;
+    border-right: 1px solid #D93636;
+    border-bottom: 1px solid #D93636;
+    border-left: 1px solid #D93636;
+    text-align: center;
+}
